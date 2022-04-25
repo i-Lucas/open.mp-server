@@ -11,10 +11,9 @@ function::DriftSystem() {
 
                 new Float:x, Float:y, Float:z;
                 GetVehicleVelocity(vehicleid, x, y, z);
-
                 new speed = floatround(floatsqroot(x * x + y * y + z * z) * 200.0);
 
-                if (speed > 2.5) {
+                if (speed > 25) {
 
                     new radianos = floatround(atan2(y, x));
                     if (radianos > 400) radianos -= 400;
@@ -36,7 +35,8 @@ function::DriftSystem() {
                     new key[3];
                     GetPlayerKeys(i, key[0], key[1], key[2]);
 
-                    if (key[0] == 8 && speed > 30) {
+                    // key[0] == 8 == "W" -> 32 = Espaço
+                    if (key[0] != 32 && speed > 25) {
                         if (radianos > 3 && ((radianos * speed) / 30) < 300) {
                             DriftEarn(i, (radianos * speed) / 35);
                         }
@@ -51,7 +51,7 @@ function::DriftSystem() {
 
 function::DriftEarn(playerid, score) {
 
-    score *= 6;
+    score *= 8;
 
     if (drift_on[playerid]) {
 
@@ -61,36 +61,35 @@ function::DriftEarn(playerid, score) {
         new str[128];
         switch (drift_points[playerid]) {
 
-            case 000..290 : str = "~b~Drift", drift_score[playerid] = 0;
-            case 291..600 : str = "~r~Good Drift", drift_score[playerid] = 1;
-            case 601..1800 : str = "~g~Great Drift", drift_score[playerid] = 2;
+            case 000..1500 : str = "~b~Drift", drift_score[playerid] = 0;
+            case 1501..2900 : str = "~r~Good Drift", drift_score[playerid] = 1;
+            case 2901..3800 : str = "~g~Great Drift", drift_score[playerid] = 2;
 
-            case 1801..3900 : str = "~y~SUPER DRIFT!", drift_score[playerid] = 4;
-            case 3901..7000 : str = "~b~COLOSSAL DRIFT!", drift_score[playerid] = 5;
-            case 7001..20000 : str = "~r~LEGENDARY DRIFT!", drift_score[playerid] = 6;
-            case 20001..40000 : str = "~g~INSANE DRIFT!", drift_score[playerid] = 8;
-            default: str = "~r~DRIFT KING!", drift_score[playerid] = 10;
+            case 3801..6600 : str = "~y~SUPER DRIFT!", drift_score[playerid] = 3;
+            case 6601..9600 : str = "~b~COLOSSAL DRIFT!", drift_score[playerid] = 4;
+            case 9601..15000 : str = "~r~LEGENDARY DRIFT!", drift_score[playerid] = 5;
+            case 15001..25000 : str = "~g~INSANE DRIFT!", drift_score[playerid] = 6;
+            default: str = "~r~DRIFT KING!", drift_score[playerid] = 7;
         }
 
-        format(str, sizeof(str), "%0d %s", drift_points[playerid], str);
+        format(str, sizeof(str), "x~r~%d ~w~%0d %s", drift_score[playerid] + 1, drift_points[playerid], str);
         TextDrawSetString(driftbar[playerid], str);
 
         KillTimer(drift_timer[playerid]);
-        drift_timer[playerid] = SetTimerEx("DriftCheck", 2500, false, "id", drift_points[playerid], playerid);
+        drift_timer[playerid] = SetTimerEx("DriftCheck", 1700, false, "id", drift_points[playerid], playerid);
     }
     return true;
 }
 
 function::DriftCheck(score, playerid) {
 
-    if (drift_points[playerid] == score && drift_on[playerid]) {
+    if (drift_on[playerid]) {
+        if (drift_points[playerid] == score) {
 
-        drift_points[playerid] = 0;
-        // new player_score = GetPlayerScore(playerid);
-        // SetPlayerScore(playerid, 0);
-        // SetPlayerScore(playerid, player_score + drift_score[playerid]);
-        SetScore(playerid, drift_score[playerid]);
-        TextDrawHideForPlayer(playerid, driftbar[playerid]);
+            drift_points[playerid] = 0;
+            SetScore(playerid, drift_score[playerid]);
+            TextDrawHideForPlayer(playerid, driftbar[playerid]);
+        }
     }
     return true;
 }

@@ -18,8 +18,11 @@ main() {
 public OnGameModeInit() {
 
     SetGameModeText("GM");
-    AddPlayerClass(23, -276.3746, 1556.0365, 75.3594, 133.5556, 0, 0, 0, 0, 0, 0);
-    AddStaticVehicle(562, -275.2365, 1552.6189, 75.1911, 133.9876, 1, 1);
+    // AddPlayerClass(23, -276.3746, 1556.0365, 75.3594, 133.5556, 0, 0, 0, 0, 0, 0);
+    // AddStaticVehicle(562, -275.2365, 1552.6189, 75.1911, 133.9876, 1, 1);
+
+    AddStaticVehicle(562, 1410.3368, 1430.7590, 10.4773, 176.4497, 1, 1); // aero lv
+    AddPlayerClass(23, 1410.3368, 1430.7590, 10.4773, 133.5556, 0, 0, 0, 0, 0, 0);
 
     SetTimer("DriftSystem", 850, true);
     return true;
@@ -91,12 +94,15 @@ public OnPlayerExitVehicle(playerid, vehicleid) {
 
 public OnVehicleDamageStatusUpdate(vehicleid, playerid) {
 
-    if (drift_points[playerid] > 100 && drift_on[playerid]) {
+    if (drift_on[playerid]) {
+        if (drift_points[playerid] > 0) {
 
-        drift_points[playerid] = 0;        
-        TextDrawSetString(driftbar[playerid], "~r~FAIL");
-        KillTimer(drift_timer[playerid]);
-        SetScore(playerid, -10);
+            drift_points[playerid] = 0;
+            drift_score[playerid] = 0;
+            TextDrawSetString(driftbar[playerid], "~r~FAIL");
+            KillTimer(drift_timer[playerid]);
+            SetScore(playerid, -10);
+        }
     }
     return 1;
 }
@@ -104,7 +110,6 @@ public OnVehicleDamageStatusUpdate(vehicleid, playerid) {
 public OnPlayerStateChange(playerid, newstate, oldstate) {
 
     if (newstate == PLAYER_STATE_DRIVER) {
-
         PlayerTextDrawShow(playerid, speedometer[playerid]);
 
     } else if (oldstate == PLAYER_STATE_DRIVER) {
@@ -176,7 +181,25 @@ public OnPlayerInteriorChange(playerid, newinteriorid, oldinteriorid) {
 }
 
 public OnPlayerKeyStateChange(playerid, newkeys, oldkeys) {
-    return true;
+
+    if (IsPlayerInAnyVehicle(playerid)) {
+
+        new vehicleid = GetPlayerVehicleID(playerid);
+
+        if (IsDriftCar(vehicleid) && (oldkeys & 1 || oldkeys & 4)) {
+
+            RemoveVehicleComponent(vehicleid, 1010);
+            AddVehicleComponent(vehicleid, 1010);
+
+            new Float: health;
+            GetVehicleHealth(vehicleid, health);
+            if (health < 1000) {
+                RepairVehicle(vehicleid);
+                SetVehicleHealth(vehicleid, 1000);
+            }
+        }
+    }
+    return 1;
 }
 
 public OnRconLoginAttempt(ip[], password[], success) {
@@ -194,6 +217,7 @@ public OnPlayerUpdate(playerid) {
             PlayerTextDrawSetString(playerid, speedometer[playerid], kmh);
         }
     }
+
     return true;
 }
 
