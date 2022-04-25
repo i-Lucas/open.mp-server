@@ -12,3 +12,6 @@ server_log.txt
 /components
 /.vscode
 /assets
+
+server.cfg
+bans.json
