@@ -1,0 +1,14 @@
+
+# binaries
+omp-server.exe
+omp-server.pdb
+
+# txt
+log.txt
+server_log.txt
+
+# folders
+/old
+/components
+/vscode
+/assets
