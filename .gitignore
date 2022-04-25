@@ -10,5 +10,5 @@ server_log.txt
 # folders
 /old
 /components
-/vscode
+/.vscode
 /assets
